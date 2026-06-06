@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SPTech.AI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --ink:#0f172a;
+  --ink2:#334155;
+  --ink3:#64748b;
+  --paper:#ffffff;
+  --paper2:#f8fafc;
+  --paper3:#f1f5f9;
+  --blue:#1d4ed8;
+  --blue-l:#eff6ff;
+  --blue-b:#bfdbfe;
+  --green:#16a34a;
+  --red:#dc2626;
+  --border:#e2e8f0;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+  --r:10px;
+  --font:'DM Sans',sans-serif;
+  --mono:'DM Mono',monospace;
+}
+
+html,body{height:100%;font-family:var(--font);background:var(--paper2);color:var(--ink)}
+
+/* ── Shell ── */
+.shell{
+  display:flex;flex-direction:column;
+  height:100vh;max-width:800px;margin:0 auto;
+  background:var(--paper);
+  box-shadow:0 0 0 1px var(--border),var(--shadow);
+}
+
+/* ── Topbar ── */
+.topbar{
+  padding:12px 18px;
+  background:var(--blue);
+  display:flex;align-items:center;gap:12px;
+  flex-shrink:0;
+}
+.topbar-logo{
+  width:34px;height:34px;border-radius:8px;
+  background:rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+}
+.topbar-text{flex:1}
+.topbar-text h1{font-size:14px;font-weight:600;color:#fff;letter-spacing:-.01em}
+.topbar-text p{font-size:11px;color:rgba(255,255,255,.7);margin-top:1px}
+.btn-cfg{
+  background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
+  color:#fff;border-radius:7px;padding:5px 12px;
+  font-size:12px;font-family:var(--font);cursor:pointer;
+  transition:background .15s;white-space:nowrap;
+}
+.btn-cfg:hover{background:rgba(255,255,255,.25)}
+
+/* ── Config drawer ── */
+.cfg{
+  background:#0f2642;color:#e2e8f0;
+  padding:16px 18px;border-bottom:1px solid #1e3a5f;
+  flex-shrink:0;
+}
+.cfg h3{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:12px}
+.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.cfg-field{display:flex;flex-direction:column;gap:3px}
+.cfg-field label{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
+.cfg-field input{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  border-radius:6px;padding:7px 10px;color:#e2e8f0;
+  font-family:var(--mono);font-size:11px;outline:none;
+  transition:border-color .15s;
+}
+.cfg-field input:focus{border-color:#60a5fa}
+.cfg-field.full{grid-column:1/-1}
+.cfg-note{
+  font-size:11px;color:#94a3b8;
+  background:rgba(255,255,255,.05);border-radius:6px;
+  padding:8px 10px;margin-bottom:10px;line-height:1.5;
+}
+.cfg-note strong{color:#fbbf24}
+.cfg-bar{display:flex;align-items:center;gap:10px}
+.btn-save{
+  background:#1d4ed8;color:#fff;border:none;border-radius:7px;
+  padding:8px 18px;font-size:13px;font-weight:600;
+  font-family:var(--font);cursor:pointer;transition:background .15s;
+}
+.btn-save:hover{background:#1e40af}
+#cfgStatus{font-size:12px}
+
+/* ── Section chips ── */
+.chips{
+  padding:9px 18px;background:var(--paper2);
+  border-bottom:1px solid var(--border);
+  display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;
+  flex-shrink:0;
+}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  flex-shrink:0;padding:4px 11px;border-radius:20px;
+  border:1px solid var(--border);background:var(--paper);
+  font-size:11px;color:var(--ink3);cursor:pointer;
+  font-family:var(--font);transition:all .15s;white-space:nowrap;
+}
+.chip:hover{border-color:var(--blue);color:var(--blue)}
+.chip.on{background:var(--blue-l);border-color:var(--blue-b);color:var(--blue);font-weight:500}
+
+/* ── Messages ── */
+.msgs{
+  flex:1;overflow-y:auto;padding:18px;
+  display:flex;flex-direction:column;gap:14px;
+}
+
+.row{display:flex;gap:9px;animation:fadein .25s ease}
+.row.me{flex-direction:row-reverse}
+@keyframes fadein{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+.av{
+  width:30px;height:30px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;
+}
+.row.ai .av{background:var(--blue);color:#fff}
+.row.me .av{background:var(--paper3);color:var(--ink3);border:1px solid var(--border)}
+
+.bubble-wrap{max-width:78%}
+.bubble{
+  padding:10px 13px;border-radius:var(--r);
+  font-size:13.5px;line-height:1.65;
+}
+.row.ai .bubble{
+  background:var(--paper2);border:1px solid var(--border);
+  border-top-left-radius:3px;color:var(--ink);
+}
+.row.me .bubble{
+  background:var(--blue);color:#fff;
+  border-top-right-radius:3px;
+}
+.bubble strong{font-weight:600}
+.bubble code{
+  font-family:var(--mono);font-size:11.5px;
+  background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px;
+}
+
+/* Links para páginas */
+.plinks{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.plink{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 10px;background:var(--blue-l);
+  border:1px solid var(--blue-b);border-radius:20px;
+  font-size:11px;color:var(--blue);text-decoration:none;
+  transition:all .15s;
+}
+.plink:hover{background:#dbeafe;border-color:#93c5fd}
+
+/* Typing */
+.typing-row{display:flex;gap:9px}
+.typing-bub{
+  padding:11px 14px;background:var(--paper2);
+  border:1px solid var(--border);border-radius:var(--r);
+  border-top-left-radius:3px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.dots{display:flex;align-items:center;gap:4px}
+.dots span{
+  width:6px;height:6px;background:var(--ink3);border-radius:50%;
+  animation:bop 1.1s infinite;
+}
+.dots span:nth-child(2){animation-delay:.18s}
+.dots span:nth-child(3){animation-delay:.36s}
+@keyframes bop{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-4px);opacity:1}}
+.sts{font-size:11px;color:var(--ink3);display:flex;align-items:center;gap:5px}
+
+/* ── Input ── */
+.inputbar{
+  padding:12px 18px;background:var(--paper);
+  border-top:1px solid var(--border);
+  display:flex;gap:9px;align-items:flex-end;flex-shrink:0;
+}
+textarea{
+  flex:1;border:1px solid var(--border);border-radius:var(--r);
+  padding:9px 13px;font-family:var(--font);font-size:13.5px;
+  color:var(--ink);outline:none;resize:none;
+  min-height:42px;max-height:110px;line-height:1.5;
+  background:var(--paper2);transition:border-color .15s,background .15s;
+}
+textarea:focus{border-color:var(--blue);background:var(--paper)}
+textarea::placeholder{color:var(--ink3)}
+
+.btn-send{
+  width:42px;height:42px;border-radius:var(--r);
+  background:var(--blue);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;flex-shrink:0;
+}
+.btn-send:hover{background:#1e40af;transform:scale(1.04)}
+.btn-send:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-send svg{width:17px;height:17px;fill:#fff}
+
+.foot{
+  text-align:center;font-size:10px;color:var(--ink3);
+  padding:5px;background:var(--paper2);border-top:1px solid var(--border);
+  flex-shrink:0;
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-logo">🎓</div>
+    <div class="topbar-text">
+      <h1>SPTech.AI — Claude</h1>
+      <p>Assistente inteligente · Reconhecimento Sistemas de Informação</p>
+    </div>
+    <button class="btn-cfg" onclick="toggleCfg()">⚙ Configurar API</button>
+  </div>
+
+  <!-- Config drawer -->
+  <div class="cfg" id="cfgPanel" style="display:none">
+    <h3>🔐 Credenciais de acesso</h3>
+
+    <div class="cfg-note">
+      <strong>Como obter as credenciais:</strong><br>
+      • <strong>Anthropic API Key</strong>: <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:#60a5fa">console.anthropic.com/settings/keys</a><br>
+      • <strong>Tenant / Client ID / Secret</strong>: <a href="https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps" target="_blank" style="color:#60a5fa">portal.azure.com → App Registrations</a><br>
+      • Permissões necessárias no app Azure: <code style="font-family:var(--mono);font-size:11px;background:rgba(255,255,255,.1);padding:1px 5px;border-radius:3px">Sites.Read.All</code> e <code style="font-family:var(--mono);font-size:11px;background:rgba(255,255,255,.1);padding:1px 5px;border-radius:3px">Files.Read.All</code>
+    </div>
+
+    <div class="cfg-grid">
+      <div class="cfg-field">
+        <label>Anthropic API Key *</label>
+        <input id="cAnthropic" type="password" placeholder="sk-ant-api03-..."/>
+      </div>
+      <div class="cfg-field">
+        <label>Tenant ID (Azure AD) *</label>
+        <input id="cTenant" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx"/>
+      </div>
+      <div class="cfg-field">
+        <label>Client ID *</label>
+        <input id="cClient" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx"/>
+      </div>
+      <div class="cfg-field">
+        <label>Client Secret *</label>
+        <input id="cSecret" type="password" placeholder="••••••••••••••••••••"/>
+      </div>
+      <div class="cfg-field full">
+        <label>URL do Site SharePoint</label>
+        <input id="cSite" type="text" value="https://bandteccom.sharepoint.com/sites/RECONHECIMENTOSISTEMASDEINFORMAOSPTECH"/>
+      </div>
+    </div>
+    <div class="cfg-bar">
+      <button class="btn-save" onclick="saveCfg()">✓ Salvar e conectar</button>
+      <span id="cfgStatus"></span>
+    </div>
+  </div>
+
+  <!-- Chips -->
+  <div class="chips">
+    <button class="chip on"  onclick="setChip(null,this)">📋 Tudo</button>
+    <button class="chip" onclick="setChip('Políticas Institucionais',this)">📜 Políticas</button>
+    <button class="chip" onclick="setChip('Corpo Docente',this)">👨‍🏫 Corpo Docente</button>
+    <button class="chip" onclick="setChip('Prontuário Docente',this)">📁 Prontuário</button>
+    <button class="chip" onclick="setChip('Infraestrutura',this)">🏛 Infraestrutura</button>
+    <button class="chip" onclick="setChip('Dimensão 1',this)">1️⃣ Dimensão 1</button>
+    <button class="chip" onclick="setChip('Dimensão 2',this)">2️⃣ Dimensão 2</button>
+    <button class="chip" onclick="setChip('Dimensão 3',this)">3️⃣ Dimensão 3</button>
+    <button class="chip" onclick="setChip('Documentos',this)">📂 Documentos</button>
+    <button class="chip" onclick="setChip('Solicitações da Comissão',this)">📨 Comissão</button>
+    <button class="chip" onclick="setChip('Nossa Jornada',this)">🗺 Jornada</button>
+  </div>
+
+  <!-- Mensagens -->
+  <div class="msgs" id="msgs">
+    <div class="row ai">
+      <div class="av">AI</div>
+      <div class="bubble-wrap">
+        <div class="bubble">
+          Olá! Sou o <strong>SPTech.AI</strong>, assistente Claude do site de Reconhecimento do curso de Sistemas de Informação. 🎓<br><br>
+          Posso buscar documentos e páginas do SharePoint e responder com base no conteúdo real do site.<br><br>
+          👉 Clique em <strong>⚙ Configurar API</strong> e preencha as credenciais para começar. Depois é só perguntar!
+        </div>
+        <div class="plinks">
+          <a class="plink" href="https://bandteccom.sharepoint.com/sites/RECONHECIMENTOSISTEMASDEINFORMAOSPTECH/SitePages/Politicas-Institucionais.aspx" target="_blank">📜 Políticas Institucionais</a>
+          <a class="plink" href="https://bandteccom.sharepoint.com/sites/RECONHECIMENTOSISTEMASDEINFORMAOSPTECH/SitePages/Infraestrutura.aspx" target="_blank">🏛 Infraestrutura</a>
+          <a class="plink" href="https://bandteccom.sharepoint.com/sites/RECONHECIMENTOSISTEMASDEINFORMAOSPTECH/SitePages/Corpo-Docente.aspx" target="_blank">👨‍🏫 Corpo Docente</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="inputbar">
+    <textarea id="inp" placeholder="Pergunte sobre documentos, páginas ou processos do SharePoint SPTech..." rows="1"
+      onkeydown="onKey(event)" oninput="grow(this)"></textarea>
+    <button class="btn-send" id="sendBtn" onclick="send()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+
+  <div class="foot">SPTech.AI · Claude Sonnet (Anthropic API) · Microsoft Graph API · Acesso somente leitura ao SharePoint</div>
+</div>
+
+<script>
+// ── Estado ────────────────────────────────────────────────────────────────────
+const C={
+  anthropicKey:'',tenantId:'',clientId:'',clientSecret:'',
+  siteUrl:'https://bandteccom.sharepoint.com/sites/RECONHECIMENTOSISTEMASDEINFORMAOSPTECH',
+  ready:false
+};
+let section=null, hist=[];
+
+const SITE_BASE='https://bandteccom.sharepoint.com/sites/RECONHECIMENTOSISTEMASDEINFORMAOSPTECH';
+const PAGES={
+  'Nossa Jornada Avaliativa':  'SitePages/Nossa-Jornada-Avaliativa.aspx',
+  'Nossa Comunidade':           'SitePages/Nossa-Comunidade.aspx',
+  'Nossos Parceiros':           'SitePages/Nossos-Parceiros.aspx',
+  'Políticas Institucionais':   'SitePages/Politicas-Institucionais.aspx',
+  'Corpo Docente e Tutorial':   'SitePages/Corpo-Docente.aspx',
+  'Prontuário Docente':         'SitePages/Prontuario-Docente.aspx',
+  'Infraestrutura':             'SitePages/Infraestrutura.aspx',
+  'Documentos Iniciais':        'SitePages/Documentos-Iniciais.aspx',
+  'Documentos Mantenedora':     'SitePages/Documentos-Mantenedora.aspx',
+  'Documentos da Mantida':      'SitePages/Documentos-Mantida.aspx',
+  'Solicitações da Comissão':   'SitePages/Solicitacoes-Comissao.aspx',
+  'Dimensão 1':                 'SitePages/Dimensao-1.aspx',
+  'Dimensão 2':                 'SitePages/Dimensao-2.aspx',
+  'Dimensão 3':                 'SitePages/Dimensao-3.aspx',
+};
+
+// ── Config ────────────────────────────────────────────────────────────────────
+function toggleCfg(){
+  const p=document.getElementById('cfgPanel');
+  p.style.display=p.style.display==='none'?'block':'none';
+}
+
+function saveCfg(){
+  C.anthropicKey=document.getElementById('cAnthropic').value.trim();
+  C.tenantId    =document.getElementById('cTenant').value.trim();
+  C.clientId    =document.getElementById('cClient').value.trim();
+  C.clientSecret=document.getElementById('cSecret').value.trim();
+  C.siteUrl     =document.getElementById('cSite').value.trim();
+  const st=document.getElementById('cfgStatus');
+  if(!C.anthropicKey||!C.tenantId||!C.clientId||!C.clientSecret){
+    st.style.color='#f87171'; st.textContent='⚠ Preencha todos os campos obrigatórios'; return;
+  }
+  C.ready=true;
+  st.style.color='#4ade80'; st.textContent='✓ Conectado!';
+  setTimeout(()=>document.getElementById('cfgPanel').style.display='none',900);
+}
+
+function setChip(sec,btn){
+  section=sec;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+// ── Graph API ─────────────────────────────────────────────────────────────────
+async function getToken(){
+  const r=await fetch(`https://login.microsoftonline.com/${C.tenantId}/oauth2/v2.0/token`,{
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:new URLSearchParams({
+      grant_type:'client_credentials',
+      client_id:C.clientId,
+      client_secret:C.clientSecret,
+      scope:'https://graph.microsoft.com/.default'
+    })
+  });
+  if(!r.ok) throw new Error('Falha na autenticação Azure AD. Verifique Tenant ID, Client ID e Secret.');
+  return (await r.json()).access_token;
+}
+
+async function getSiteId(token){
+  const u=new URL(C.siteUrl);
+  const r=await fetch(`https://graph.microsoft.com/v1.0/sites/${u.hostname}:${u.pathname}`,
+    {headers:{Authorization:`Bearer ${token}`}});
+  if(!r.ok) throw new Error('Não foi possível acessar o site SharePoint. Verifique a URL e as permissões do app.');
+  return (await r.json()).id;
+}
+
+async function fetchSP(token,siteId,query){
+  let content='', found=[];
+  const q=query.toLowerCase();
+  const auth={headers:{Authorization:`Bearer ${token}`}};
+
+  // 1. Páginas do site
+  const pr=await fetch(`https://graph.microsoft.com/v1.0/sites/${siteId}/pages`,auth);
+  if(pr.ok){
+    let pages=(await pr.json()).value||[];
+    if(section) pages=pages.filter(p=>(p.name||p.title||'').toLowerCase().includes(section.toLowerCase()));
+    const scored=pages.map(p=>{
+      const txt=((p.name||'')+(p.title||'')+(p.description||'')).toLowerCase();
+      return{p,s:q.split(' ').filter(w=>w.length>2&&txt.includes(w)).length};
+    }).sort((a,b)=>b.s-a.s);
+    for(const{p} of scored.slice(0,5)){
+      const nm=p.name||p.title||'Página';
+      found.push(nm);
+      content+=`\n\n=== PÁGINA: ${nm} ===\n`;
+      if(p.description) content+=`Descrição: ${p.description}\n`;
+      if(p.lastModifiedDateTime) content+=`Atualizada: ${p.lastModifiedDateTime}\n`;
+    }
+  }
+
+  // 2. Documentos
+  const dr=await fetch(
+    `https://graph.microsoft.com/v1.0/sites/${siteId}/drive/root/search(q='${encodeURIComponent(query)}')`,auth);
+  if(dr.ok){
+    const docs=(await dr.json()).value||[];
+    for(const d of docs.slice(0,4)){
+      const ext=(d.name||'').split('.').pop().toLowerCase();
+      if(!['pdf','docx','doc','xlsx','pptx','txt'].includes(ext)) continue;
+      found.push(d.name);
+      content+=`\n\n=== DOCUMENTO: ${d.name} ===\n`;
+      content+=`Tipo: ${ext.toUpperCase()} | ${Math.round((d.size||0)/1024)}KB | Modificado: ${d.lastModifiedDateTime||'N/A'}\n`;
+      if(d.description) content+=d.description+'\n';
+      // Tenta ler conteúdo de arquivos de texto pequenos
+      if(d.size<300000&&d['@microsoft.graph.downloadUrl']){
+        try{
+          const tr=await fetch(d['@microsoft.graph.downloadUrl']);
+          if(tr.ok){const tx=await tr.text();content+=`Conteúdo: ${tx.substring(0,600)}\n`;}
+        }catch(e){}
+      }
+    }
+  }
+
+  // 3. Listas
+  const lr=await fetch(`https://graph.microsoft.com/v1.0/sites/${siteId}/lists`,auth);
+  if(lr.ok){
+    const lists=(await lr.json()).value||[];
+    for(const l of lists.filter(x=>!x.system).slice(0,3)){
+      content+=`\n\n=== LISTA: ${l.displayName} ===\n${l.description||''}\n`;
+    }
+  }
+
+  return{content:content||'Nenhum conteúdo localizado.',found:[...new Set(found)]};
+}
+
+// ── Claude API ────────────────────────────────────────────────────────────────
+async function askClaude(query,spContent,found){
+  const sys=`Você é o SPTech.AI, assistente inteligente do site de Reconhecimento do curso de Sistemas de Informação da SPTech (Bandtec).
+
+REGRAS:
+1. Responda SEMPRE em português brasileiro
+2. Use APENAS o conteúdo do SharePoint fornecido — nunca invente dados
+3. Seja objetivo: no máximo 4 parágrafos
+4. Sempre indique a página ou documento onde a informação está
+5. Se não encontrar, diga claramente e sugira onde procurar
+6. Nunca compartilhe dados pessoais além do que está publicado
+7. Filtro de seção ativo: ${section||'Todas as seções'}
+
+PÁGINAS DO SITE:
+${Object.keys(PAGES).join(', ')}
+
+CONTEÚDO ATUAL DO SHAREPOINT:
+${spContent}`;
+
+  const messages=[...hist.slice(-6),{role:'user',content:query}];
+  const r=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':C.anthropicKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      system:sys,
+      messages
+    })
+  });
+  if(!r.ok){
+    const e=await r.json();
+    throw new Error(e.error?.message||'Erro na API do Claude');
+  }
+  return(await r.json()).content?.[0]?.text||'Sem resposta.';
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────────
+function addMsg(role,html,links=[]){
+  const c=document.getElementById('msgs');
+  const d=document.createElement('div');
+  d.className=`row ${role}`;
+  const init=role==='ai'?'AI':'MM';
+  const lh=links.length?`<div class="plinks">${links.map(n=>{
+    const path=PAGES[n]||`SitePages/${encodeURIComponent(n)}.aspx`;
+    return`<a class="plink" href="${SITE_BASE}/${path}" target="_blank">📄 ${esc(n)}</a>`;
+  }).join('')}</div>`:'';
+  d.innerHTML=`<div class="av">${init}</div><div class="bubble-wrap"><div class="bubble">${html}</div>${lh}</div>`;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+
+function addTyping(){
+  const c=document.getElementById('msgs');
+  const d=document.createElement('div');
+  d.className='typing-row';d.id='typ';
+  d.innerHTML=`<div class="av" style="width:30px;height:30px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">AI</div>
+  <div class="typing-bub">
+    <div class="dots"><span></span><span></span><span></span></div>
+    <div class="sts" id="sts">🔍 Buscando no SharePoint...</div>
+  </div>`;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function setSts(t){const e=document.getElementById('sts');if(e)e.textContent=t;}
+function rmTyping(){const t=document.getElementById('typ');if(t)t.remove();}
+
+async function send(){
+  const inp=document.getElementById('inp');
+  const q=inp.value.trim();if(!q)return;
+  document.getElementById('sendBtn').disabled=true;
+  inp.value='';inp.style.height='auto';
+  addMsg('me',esc(q));
+  hist.push({role:'user',content:q});
+  addTyping();
+  try{
+    let spContent='',found=[];
+    if(C.ready){
+      setSts('🔐 Autenticando no Azure AD...');
+      const tok=await getToken();
+      setSts('🌐 Conectando ao SharePoint...');
+      const sid=await getSiteId(tok);
+      setSts('📂 Buscando páginas e documentos...');
+      const res=await fetchSP(tok,sid,q);
+      spContent=res.content;found=res.found;
+      setSts('🤖 Consultando Claude...');
+    }else{
+      spContent='Credenciais não configuradas. Oriente o usuário a clicar em ⚙ Configurar API.';
+      found=inferPages(q);
+    }
+    const ans=await askClaude(q,spContent,found);
+    hist.push({role:'assistant',content:ans});
+    if(!C.ready) found=inferPages(q+' '+ans);
+    rmTyping();
+    addMsg('ai',fmt(ans),found.slice(0,4));
+  }catch(e){
+    rmTyping();
+    addMsg('ai',`⚠️ <strong>Erro:</strong> ${esc(e.message)}<br><small style="color:var(--ink3)">Verifique as credenciais em ⚙ Configurar API.</small>`);
+  }
+  document.getElementById('sendBtn').disabled=false;
+  inp.focus();
+}
+
+function inferPages(t){
+  const txt=t.toLowerCase();
+  return Object.keys(PAGES).filter(p=>
+    p.toLowerCase().split(' ').some(w=>w.length>3&&txt.includes(w))
+  ).slice(0,3);
+}
+
+function fmt(t){
+  return esc(t)
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/`(.*?)`/g,'<code>$1</code>')
+    .replace(/\n/g,'<br>');
+}
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
+function grow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px';}
+</script>
+</body>
+</html>
